@@ -1,10 +1,14 @@
 """
 File IO module
 """
+
 from os import path, makedirs
 from pathlib import Path
-
 from typing import NoReturn
+
+
+def get_dir() -> tuple: ...
+
 
 def mkdir(file_path: str) -> NoReturn:
     """
@@ -22,3 +26,7 @@ def mkdir(file_path: str) -> NoReturn:
             raise
 
 
+def try_open(): ...
+
+
+def try_read(): ...
