@@ -3,9 +3,6 @@ from enum import Enum
 from functools import lru_cache
 
 
-from ..base.enums import System
-
-
 class System(Enum):
     Other = "other"
     AIX = "aix"
@@ -15,8 +12,8 @@ class System(Enum):
     macOS = "darwin"
     FreeBSD = "freebsd"
 
-    @lru_cache(1)
     @classmethod
+    @lru_cache(1)
     def get_os(cls, os_str: str = platform.system()) -> "System":
         if os_str == "win32":
             return cls.Win32
@@ -32,24 +29,26 @@ class System(Enum):
             return cls.FreeBSD
         return cls.Other
 
+
 class Arch(Enum):
-    x86 = "x86"
-    x64 = "x64"
+    x86 = "i386"
+    x64 = "amd64"
     ARM = "arm"
     ARM64 = "arm64"
     Other = "other"
 
-    @lru_cache(1)
     @classmethod
+    @lru_cache(1)
     def get_arch(cls, arch_str: str = platform.machine()) -> "Arch":
-        if arch_str == "AMD64":
+        arch_str = arch_str.lower().replace("_", "")
+        if arch_str == "amd64":
             return cls.x64
-        if arch_str == "x86":
+        if arch_str == "i386":
             return cls.x86
-        if arch_str == "ARM":
+        if arch_str == "arm":
             return cls.ARM
-        if arch_str == "ARM64":
+        if arch_str == "arm64":
             return cls.ARM64
-        
-    
+        return cls.Other
+
 env_os = System.get_os()
