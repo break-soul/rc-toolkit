@@ -26,7 +26,25 @@ def mkdir(file_path: str) -> NoReturn:
             raise
 
 
-def try_open(): ...
+def try_open():
+    """
+    try to open file
+    """
+    
+    try:
+        with open() as file:
+            pass
+    except Exception:  # pylint: disable=broad-exception-caught
+        raise
 
 
-def try_read(): ...
+def try_read():
+    """
+    try to read file
+    """
+    
+    try:
+        with open() as file:
+            pass
+    except Exception:  # pylint: disable=broad-exception-caught
+        raise
