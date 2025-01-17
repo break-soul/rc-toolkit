@@ -26,7 +26,7 @@ def get_zstd(i: int = 0) -> "object":
         else:
             raise ValueError("Invalid i")
     except ImportError:
-        raise ImportError(get_error("zstandard"))
+        get_error("zstandard")
     return zstd
 
 
@@ -66,7 +66,7 @@ def get_ed25519() -> "object":
     try:
         from cryptography.hazmat.primitives.asymmetric import ed25519  # type: ignore
     except ImportError:
-        raise ImportError(get_error("cryptography"))
+        get_error("cryptography")
     return ed25519
 
 

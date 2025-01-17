@@ -2,8 +2,9 @@
 Store the enums used in the package.
 """
 
+from ast import Dict
 from enum import Enum
-from typing import overload, Tuple
+from typing import Text, overload, Tuple
 
 from ..system.base import System, Arch
 
@@ -13,6 +14,15 @@ def mode_func(*args, **kw): ...
 
 class _MISSING_TYPE:
     pass
+
+
+class DataType(Enum):
+    File = b"0000"
+    Object = b"0001"
+    Text = b"0010"
+    JSON = b"0011"
+    Dict = b"0100"
+
 
 class CompactType(Enum):
     ZIP = b"0000"
@@ -33,6 +43,7 @@ class HashType(Enum):
     SHA_256 = b"0000"
     SHA_384 = b"0001"
     SHA_512 = b"0010"
+
 
 class Release(Enum):
     ALPHA = "a"
