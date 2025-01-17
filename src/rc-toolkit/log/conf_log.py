@@ -6,7 +6,7 @@ from logging import config
 
 from ..base.control import Env
 from .get_log import get_logger
-from .trans import trans_config
+from .tran_log import trans_config
 
 
 def __config_log(*args, **kw) -> None:
@@ -19,7 +19,7 @@ def __config_log(*args, **kw) -> None:
     try:
         config.dictConfig(trans_config(*args, **kw))
     except Exception as e:  # pylint: disable=broad-exception-caught
-        logger = get_logger("RCTK.log.gger")
+        logger = get_logger("RCTK.log.config_log")
         logger.error(
             "Failed to set logging config: {error}\nData: {data}",
             error=e,
