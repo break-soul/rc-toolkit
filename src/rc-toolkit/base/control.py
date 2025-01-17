@@ -4,9 +4,10 @@ This module contains functions to control the Python interpreter.
 
 import os
 import sys
-import importlib.util
+import builtins
+import py_compile
 
-from typing import NoReturn, TYPE_CHECKING
+from typing import NoReturn, TYPE_CHECKING, Optional
 
 from rclog import get_log
 
@@ -36,9 +37,10 @@ class Env:
         """
         return bool(Env.get_env("DEBUG", default=0))
 
+
 @lazy_load
 def log() -> "Logger":
-    return get_log("RCTK.base.pycontrol")
+    return get_log("RCTK.base.control")
 
 
 def get_pycache() -> str:
@@ -60,26 +62,36 @@ class Compile:
         file, cfile=None, dfile=None, doraise=False, optimize=1, quiet=0
     ) -> None:
         log.info("Compile {file}".format(file=file))
-        import py_compile
+        py_compile.compile(file, cfile, dfile, doraise, optimize, quiet)
 
     @staticmethod
     def compile_dir(
         path, cfile=None, dfile=None, doraise=False, optimize=1, quiet=0
     ) -> None:
-        Compile.compile_file(file)
+        for root, _, files in os.walk(path):
+            for file in files:
+                if file.endswith(".py"):
+                    Compile.compile_file(
+                        os.path.join(root, file), cfile, dfile, doraise, optimize, quiet
+                    )
 
 
 def set_global(key: str, value: object) -> NoReturn:
-    import builtins
-
-    log().warning("Hooking builtin {} as {}".format(key, str(value)))
+    log().warning(f"Hooking builtin {key} as {value}")
     builtins.__dict__[key] = value
 
 
-def is_module(name, path: str) -> bool: ...
+def is_module(name, path: str) -> bool:
+    return os.path.isfile(os.path.join(path, name))
 
 
-def get_module(path: str) -> object: ...
+def get_module(path: str) -> object:
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("module.name", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def exit_py() -> NoReturn:

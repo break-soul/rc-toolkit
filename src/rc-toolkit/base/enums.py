@@ -14,6 +14,25 @@ def mode_func(*args, **kw): ...
 class _MISSING_TYPE:
     pass
 
+class CompactType(Enum):
+    ZIP = b"0000"
+    TAR = b"0001"
+    GZTAR = b"0010"
+    BZTAR = b"0011"
+    XZTAR = b"0100"
+    ZSTD = b"0101"
+
+
+class EncryptType(Enum):
+    RSA_2048 = b"0000"
+    ED25519 = b"0001"
+    ECDSA = b"0010"
+
+
+class HashType(Enum):
+    SHA_256 = b"0000"
+    SHA_384 = b"0001"
+    SHA_512 = b"0010"
 
 class Release(Enum):
     ALPHA = "a"
