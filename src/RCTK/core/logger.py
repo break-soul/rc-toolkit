@@ -1,5 +1,5 @@
 
-from typing import Any,Optional
+from typing import Union,Optional
 from logging import config, Logger, getLogger
 
 from .io import file
@@ -188,11 +188,10 @@ def set_log(config_dict,*, builtin:bool = False) -> None:
     try:
         config.dictConfig(trans_config(**config_dict))
         if builtin == True:
-            from ..utils.mod_runtime import hook_builtin
-            hook_builtin("get_log", get_log)
+            from .tk_api import tk_1
+            tk_1.tk_100000("get_log", get_log)
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger = get_log("RCTK.Log")
         logger.error("Failed to set logging config: {error}\nData: {data}",
-            error=e,data=(str(config_dict) ),
-        )
+            error=e,data=(str(config_dict) ))
         if is_debug():raise

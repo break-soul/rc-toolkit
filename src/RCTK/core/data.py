@@ -7,8 +7,8 @@ import os,json
 from typing import Any, Union, List, overload
 
 from .enums import MISSING
-
-def load(path: str, compact: bool = False, encrypt: bool = False) -> dict:
+from .io.file import mkdir
+def load(path: str) -> dict:
     """
     Load data from a file.
 
@@ -22,11 +22,12 @@ def load(path: str, compact: bool = False, encrypt: bool = False) -> dict:
         return json.load(file)
 
 
-
-def sync(data: dict, path: str, compact: bool = False, encrypt: bool = False):
+def sync(data: dict, path: str):
     """
     Sync data to a file.
     """
+    if not os.path.exists(path):
+        mkdir(path)
     with open(path, "w", encoding="utf-8") as file:
         json.dump(data, file)
 
@@ -165,31 +166,14 @@ class BaseData:
             file_p (int, optional): priority of file data. Defaults to 2.
             default_p (int, optional): priority of default data. Defaults to 1.
 
-        data processing
-            compact (bool, optional): compact the data. Defaults to False.
-                if compact is True, will find compact_type in the kw, and use the compact_type to compact the data.
-            compact_type (str, optional): compact type. Defaults to "zstd".
-            encrypt (bool, optional): encrypt the data. Defaults to False.
-                if encrypt is True, will find encrypt_type in the kw, and use the encrypt_type to encrypt the data.
-            encrypt_type (str, optional): encrypt type. Defaults to "edrsa".
-            key (str, optional): key for encrypt. Defaults to None.
-            data_type (bytes, optional): data type. Defaults to b"\x00\x00\x00".
-            hash_type (bool, optional): hash the data. Defaults to False.
-                if hash is True, will find hash_type in the kw, and use the hash_type to hash the data.
-            hash_type (str, optional): hash type. Defaults to "sha256".
-            prime (bytes, optional): prime number. Defaults to 0b111.
-                only used by encrypted data.First byte is for creator, second byte is for encrypt, third byte is for any.
-                if 111 the encrypt will not use!
     Methods:
         _dump_config(self) -> None: Dump the configuration settings.
         _load_data(self) -> None: Load the data using the priority functions.
         _load_fields(self, source: dict) -> None: Load the fields from the given source.
         _load_init(self): Load the initial data.
-        _load_env(self): Load the environment data.
         _load_file(self): Load the data from a file.
         _load_default(self): Placeholder method.
         __dir__(self) -> List[str]: Return a list of attribute names.
-        _write_data(self) -> dict: Write the data to a dictionary.
     ...
     """
 
@@ -208,23 +192,13 @@ class BaseData:
         /,
         path: Union[str, None] = None,
         init_p: int = 4,
-        env_p: int = 3,
         file_p: int = 2,
         default_p: int = 1,
-        compact: bool = False,
-        encrypt: bool = False,
-        data_type: bytes = b"\x00\x00\x00",
-        hash_type: bool = False,
         **kw,
     ) -> None:
         self._path = path
-        self._compact = compact
-        self._encrypt = encrypt
-        self._data_type = data_type
-        self._hash = hash_type
         self._p = {
             init_p: self._load_init,
-            env_p: self._load_env,
             file_p: self._load_file,
             default_p: self._load_default,
         }
@@ -276,18 +250,6 @@ class BaseData:
         """
         self._load_fields(self._kw)
 
-    def _load_env(self):
-        """
-        Loads the environment variables into the object.
-
-        This method loads the environment variables into the object by calling the `_load_fields` method
-        with the `os.environ` dictionary as the argument.
-
-        Parameters:
-            self (object): The object instance.
-        """
-        self._load_fields(os.environ)
-
     def _load_file(self):
         """
         Loads data from a file specified by the `_path` attribute.
@@ -296,8 +258,9 @@ class BaseData:
         """
         if self._path is not None:
             try:
-                data = load(self._path, self._compact, self._encrypt).get("data", {})
+                data = load(self._path)
             except FileNotFoundError:
+                sync({}, self._path)
                 data = {}
             self._load_fields(data)
 

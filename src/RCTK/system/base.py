@@ -23,8 +23,6 @@ class System(Enum):
             return cls.macOS
         if os_str == "Aix":
             return cls.AIX
-        if os_str == "Cygwin":
-            return cls.Cygwin
         if os_str.startswith("Freebsd"):
             return cls.FreeBSD
         return cls.Other
@@ -41,13 +39,13 @@ class Arch(Enum):
     @lru_cache(1)
     def get_arch(cls, arch_str: str = platform.machine()) -> "Arch":
         arch_str = arch_str.lower().replace("_", "")
-        if arch_str == "AMD64":
+        if arch_str == "amd64":
             return cls.x64
-        if arch_str == "iI386":
+        if arch_str == "i386":
             return cls.x86
-        if arch_str == "ARM":
+        if arch_str == "arm":
             return cls.ARM
-        if arch_str == "ARM64":
+        if arch_str == "arm64":
             return cls.ARM64
         return cls.Other
 
