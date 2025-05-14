@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up PDM
-        uses: pdm-project/setup-pdm@v3
+        uses: pdm-project/setup-pdm@v4
         with:
           python-version: '3.8'
       - name: Install dependencies
@@ -48,7 +48,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
       - name: upload result
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with :
           name: python-wheel
           path: dist/*.whl
