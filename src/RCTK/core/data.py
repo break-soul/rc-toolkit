@@ -2,14 +2,33 @@
 Common base class for all data
 """
 
-import os
+import os,json
 
 from typing import Any, Union, List, overload
 
-from .io import load, sync
+from .enums import MISSING
 
-from ..enums import MISSING
+def load(path: str, compact: bool = False, encrypt: bool = False) -> dict:
+    """
+    Load data from a file.
 
+    Args:
+        path (str): file path
+
+    Returns:
+        dict: data
+    """
+    with open(path, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+
+def sync(data: dict, path: str, compact: bool = False, encrypt: bool = False):
+    """
+    Sync data to a file.
+    """
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(data, file)
 
 class _Field:
     """
@@ -134,6 +153,7 @@ def Field(default: Any = MISSING, default_type: Any = MISSING) -> Any:
     return _Field(default, default_type)
 
 
+
 class BaseData:
     """
         Attributes:
@@ -209,35 +229,7 @@ class BaseData:
             default_p: self._load_default,
         }
         self._kw = kw
-        self._dump_config()
         self._load_data()
-
-    def _dump_config(self) -> None:
-        """
-        Dump the configuration settings
-        Returns:
-            None
-        """
-        # code implementation
-        self._mate = {
-            "version": 0,
-            "compact": self._compact,
-            "encrypt": self._encrypt,
-            "type": str(self._data_type),
-            "hash": self._hash,
-        }
-        if self._compact:
-            self._compact_type = self._kw.pop("compact_type", "zstd")
-            self._mate["compact_type"] = self._compact_type
-        if self._encrypt:
-            self._encrypt_type = self._kw.pop("encrypt_type", "edrsa")
-            self._prime = self._kw.pop("prime", 0b111)
-            self._key = self._kw.pop("key", None)
-            self._mate["encrypt_type"] = self._encrypt_type
-            self._mate["prime"] = self._prime
-        if self._hash:
-            self._hash_type = self._kw.pop("hash_type", "sha256")
-            self._mate["hash_type"] = self._hash_type
 
     def _load_data(self) -> None:
         """
@@ -306,7 +298,6 @@ class BaseData:
             try:
                 data = load(self._path, self._compact, self._encrypt).get("data", {})
             except FileNotFoundError:
-                sync(self._mate, self._path, self._compact, self._encrypt)
                 data = {}
             self._load_fields(data)
 
@@ -322,19 +313,3 @@ class BaseData:
             List[str]: A list of attribute names.
         """
         return list(self._fields.keys())
-
-    def _write_data(self) -> dict:
-        """
-        Writes the data of the object to a dictionary and saves it to a file.
-
-        Returns:
-            dict: The dictionary containing the data.
-
-        Raises:
-            Exception: If there is an error while saving the data.
-        """
-        data = dict()
-        for field in self._fields.values():
-            data[field.name] = field.data
-        self._mate["data"] = data
-        return sync(self._mate, self._path, self._compact, self._encrypt)
