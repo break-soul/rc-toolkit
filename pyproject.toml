@@ -1,6 +1,6 @@
 [project]
 name = "rc-toolkit"
-version = "0.2.1"
+version = "0.2.2"
 description = ""
 authors = [
     {name = "break-soul", email = "57186766+break-soul@users.noreply.github.com"},
