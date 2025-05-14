@@ -45,7 +45,7 @@ jobs:
         run: |
           pdm build
       - name: Publish release distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1.12.4
+        uses: pypa/gh-action-pypi-publish@release/v1.12
       - name: upload result
         if: success()
         uses: actions/upload-artifact@v4
