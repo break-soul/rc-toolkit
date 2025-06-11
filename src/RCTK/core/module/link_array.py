@@ -108,7 +108,7 @@ class LinkArray:
         else:
             self._by_iterator(lt)
             return self
-     
+
     def append(self, value) -> None:
         new_node = Node(node_data = value)
         if self:

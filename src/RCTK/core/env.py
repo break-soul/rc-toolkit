@@ -60,24 +60,10 @@ class Compile:
     ) -> None:
         for root, _, files in os.walk(path):
             for file in files:
-                if file.endswith(".py"):
-                    Compile.compile_file(
-                        os.path.join(root, file), cfile, dfile, doraise, optimize, quiet
-                    )
+                if file.endswith(".py"): Compile.compile_file(os.path.join(root, file), cfile, dfile, doraise, optimize, quiet=quiet)
 
-def is_module(name, path: str) -> bool:
+def is_module(name, path: str) -> bool: 
     return os.path.isfile(os.path.join(path, name))
-
-def get_module(path: str) -> object:
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("module.name", path)
-    if spec is None:
-        raise ImportError(f"Could not find module at {path}")
-    module = importlib.util.module_from_spec(spec)
-    if spec.loader is None:
-        raise ImportError(f"Could not load module at {path}")
-    spec.loader.exec_module(module)
-    return module
 
 def exit_py():
     sys.exit()

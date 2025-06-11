@@ -52,13 +52,12 @@ def decompress_with_zstd(zst_file, extract_path='.'):
         with dctx.stream_reader(f) as reader:
             while True:
                 chunk = reader.read(1024*1024)  # 1MB chunks
-                if not chunk:break
+                if not chunk: break
                 buffer.write(chunk)
     
     buffer.seek(0)   # rebuff and and dump
     with tarfile.open(fileobj=buffer, mode='r:') as tar:
-        members = [m for m in tar 
-                  if m.isfile() and not m.name.startswith(('/', '\\'))] # filter
+        members = [m for m in tar if m.isfile() and not m.name.startswith(('/', '\\'))] # filter
         tar.extractall(extract_path, members=members)
 
 def compress_zstd(f_byte , filename, arcname:str = "main"):
