@@ -5,7 +5,16 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
+        "arcname",
+        "cctx",
+        "cfile",
+        "dctx",
+        "dfile",
+        "doraise",
+        "flist",
+        "fromlist",
         "RCCP",
-        "RCTK"
+        "RCTK",
+        "tinfo"
     ]
 }

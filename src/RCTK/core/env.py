@@ -5,8 +5,11 @@ This module contains functions to control the Python interpreter.
 import os
 import sys
 import py_compile
-
+import typing
 from typing import Optional
+
+if typing.TYPE_CHECKING:
+    from logging import Logger
 
 def log() -> "Logger":
     from .logger import get_log
@@ -15,8 +18,8 @@ def log() -> "Logger":
 
 class Env:
     @staticmethod
-    def add_path(path) -> None:
-        p = Env.get_env("path") + ";" + "path"
+    def add_path(path: str) -> None:
+        p = Env.get_env("path") + ";" + path
         p = Env.set_env("path", p)
 
     @staticmethod
@@ -24,7 +27,7 @@ class Env:
         os.environ[key] = value
 
     @staticmethod
-    def get_env(key: str, default: Optional[str] = None) -> str:
+    def get_env(key: str, default: str = "None") -> str:
         return os.environ.get(key, default)
 
     @staticmethod
@@ -35,12 +38,12 @@ class Env:
         Returns:
             bool: __debug__
         """
-        return bool(Env.get_env("DEBUG", default=0))
+        return bool(Env.get_env("DEBUG", default=str(False)))
 
 is_debug = Env.is_debug
 
-def get_pycache() -> str:
-    return sys.pycache_prefix()
+def get_pycache() -> typing.Optional[str]:
+    return sys.pycache_prefix
 
 class Compile:
 
@@ -49,7 +52,7 @@ class Compile:
         file, cfile=None, dfile=None, doraise=False, optimize=1, quiet=0
     ) -> None:
         log().info("Compile {file}".format(file=file))
-        py_compile.compile(file, cfile, dfile, doraise, optimize, quiet)
+        py_compile.compile(file, cfile, dfile, doraise, optimize, quiet=quiet)
 
     @staticmethod
     def compile_dir(
@@ -68,7 +71,11 @@ def is_module(name, path: str) -> bool:
 def get_module(path: str) -> object:
     import importlib.util
     spec = importlib.util.spec_from_file_location("module.name", path)
+    if spec is None:
+        raise ImportError(f"Could not find module at {path}")
     module = importlib.util.module_from_spec(spec)
+    if spec.loader is None:
+        raise ImportError(f"Could not load module at {path}")
     spec.loader.exec_module(module)
     return module
 

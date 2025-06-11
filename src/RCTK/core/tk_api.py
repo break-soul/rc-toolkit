@@ -1,10 +1,6 @@
 
 try:
-    from .tk_core_api import (
-        tk_1 as tk_1
-    )
+    from .tk_core_api import *
 except:
-    from tk_core_api import (
-    tk_1 as tk_1
-)
+    from tk_core_api import * # type: ignore
     raise

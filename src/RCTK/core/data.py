@@ -86,7 +86,7 @@ class _Field:
     def check_type(self, value: Any) -> bool: ...
     @overload
     def check_type(self, value: Any, type_: "type") -> bool: ...
-    def check_type(self, value: Any = MISSING, type_: "type" = MISSING) -> bool:
+    def check_type(self, value: Any = MISSING, type_: "type" = MISSING) -> bool: # type: ignore
         if value is MISSING:
             return isinstance(self.data, self.type)
         if type_ is MISSING:
@@ -184,7 +184,7 @@ class BaseData:
                 _field.set_name(_name)
                 fields[_name] = _field
         obj = super().__new__(cls)
-        obj._fields = fields
+        obj._fields = fields # type: ignore
         return obj
 
     def __init__(
@@ -220,7 +220,7 @@ class BaseData:
         self._p.pop(-1, None)
         for p in sorted(self._p.keys()):
             self._p[p]()
-        for field in self._fields.values():
+        for field in self._fields.values(): # type: ignore
             setattr(self, field.name, field.data)
 
     def _load_fields(self, source: dict) -> None:
@@ -233,7 +233,7 @@ class BaseData:
         Returns:
             None
         """
-        for field in self._fields.values():
+        for field in self._fields.values(): # type: ignore
             try:
                 if field.name in source:
                     field.set_data(source[field.name])
@@ -275,4 +275,4 @@ class BaseData:
         Returns:
             List[str]: A list of attribute names.
         """
-        return list(self._fields.keys())
+        return list(self._fields.keys())     # type: ignore

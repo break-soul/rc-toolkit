@@ -1,13 +1,13 @@
 
-from typing import Union,Optional
+import typing
+from typing import Optional
 from logging import config, Logger, getLogger
 
 from .io import file
 from .env import is_debug
 
-from typing import Mapping
 
-def get_log(logger_name: Optional[str] = None) -> Logger:
+def get_log(logger_name: typing.Optional[str] = None) -> Logger:
     """
     Get the logging object
 
@@ -24,9 +24,7 @@ def get_log(logger_name: Optional[str] = None) -> Logger:
 
 # region trans
 
-def dump_format(
-    format_name: str = "default", **kw: Mapping[str, str]
-) -> "dict[str, dict[str, str]]":
+def dump_format(format_name: str = "default", **kw: typing.Mapping[str, typing.Optional[str]]) -> typing.Dict[str, typing.Dict[str, str]]:
     """
     dump formatters
 
@@ -104,9 +102,7 @@ def dump_handler(
     return back_handler
 
 
-def trans_config(
-    handlers: list, formats: Optional[list] = None, exist_loggers: bool = True, **kw
-) -> "dict[str, Any]":
+def trans_config(handlers: list, formats: Optional[list] = None, exist_loggers: bool = True, **kw) -> typing.Dict[str, typing.Any]:
     """
     trans config
 
@@ -157,14 +153,14 @@ def trans_config(
     for format_name in formats:
         config["formatters"][format_name] = dump_format(
             format_name=format_name,
-            format=kw.get(f"{format_name}_format"),
-            datefmt=kw.get(f"{format_name}_datefmt"),
+            format=kw.get(f"{format_name}_format","default"),
+            datefmt=kw.get(f"{format_name}_datefmt") # type: ignore
         )
 
     # handlers
     for handler_name in handlers:
         config["handlers"][handler_name] = dump_handler(
-            handler_class=kw.get(f"{handler_name}_class"),
+            handler_class=kw.get(f"{handler_name}_class","Console"),
             formatter=kw.get(f"{handler_name}_formatter", "default"),
             level=kw.get(f"{handler_name}_level", "INFO"),
             filename=kw.get(f"{handler_name}_filename", "log.log"),
@@ -192,6 +188,6 @@ def set_log(config_dict,*, builtin:bool = False) -> None:
             tk_1.tk_100000("get_log", get_log)
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger = get_log("RCTK.Log")
-        logger.error("Failed to set logging config: {error}\nData: {data}",
-            error=e,data=(str(config_dict) ))
+        logger.error("Failed to set logging config: {error}\nData: {data}".format(
+            error=e,data=(str(config_dict) )))
         if is_debug():raise

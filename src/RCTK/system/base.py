@@ -13,7 +13,7 @@ class System(Enum):
     FreeBSD = "freebsd"
 
     @classmethod
-    @lru_cache(1)
+    @lru_cache(3)
     def get_os(cls, os_str: str = platform.system()) -> "System":
         if os_str == "Windows":
             return cls.Win32

@@ -2,18 +2,15 @@
 Store the enums used in the package.
 """
 
-from ast import Dict
+import typing
 from enum import Enum
-from typing import Text, overload, Tuple
 
 from ..system.base import System, Arch
 
 
 def mode_func(*args, **kw): ...
 
-
-class _MISSING_TYPE:
-    pass
+class _MISSING_TYPE: ...
 
 
 class DataType(Enum):
@@ -40,9 +37,10 @@ class EncryptType(Enum):
 
 
 class HashType(Enum):
-    SHA_256 = b"0000"
-    SHA_384 = b"0001"
-    SHA_512 = b"0010"
+    SHA_256 = "sha256"
+    SHA_384 = "sha384"
+    SHA_512 = "sha512"
+    BLAKE2 = "blake2b"
 
 
 class Release(Enum):
@@ -64,17 +62,17 @@ class Release(Enum):
         raise ValueError("Invalid release string")
 
 
-MISSING = _MISSING_TYPE()
+MISSING: typing.Any = _MISSING_TYPE()
 
 
 class Version:
     def __init__(self, ver_1: int, ver_2: int, ver_3: int, build: int = 0):
-        self.ver: Tuple[int, int, int] = (ver_1, ver_2, ver_3)
+        self.ver: typing.Tuple[int, int, int] = (ver_1, ver_2, ver_3)
         self.build: int = build
 
     @classmethod
     def from_str(cls, ver_str: str) -> "Version":
-        return cls(*cls.dump_ver(ver_str))
+        return cls(*cls.dump_ver(ver_str))   # type: ignore
 
     def set_build(self, build: int) -> None:
         self.build = build
@@ -82,10 +80,10 @@ class Version:
     def get_build(self) -> int:
         return self.build
 
-    def set_ver(self, ver: Tuple[int, int, int]) -> None:
+    def set_ver(self, ver: typing.Tuple[int, int, int]) -> None:
         self.ver = ver
 
-    def get_ver(self) -> Tuple[int, int, int]:
+    def get_ver(self) -> typing.Tuple[int, int, int]:
         return self.ver
 
     def update(self, ver_path: int = 3) -> None:
@@ -93,27 +91,23 @@ class Version:
             raise ValueError("ver_path must be between 1 and 3")
         ver_list = list(self.ver)
         ver_list[ver_path - 1] += 1
-        self.ver = tuple(ver_list)
+        self.ver = tuple(ver_list)  # type: ignore
 
         if self.build != 0:
             self.build += 1
 
-    @overload
-    def dump_ver(ver_str: str) -> Tuple[int, int, int]: ...
-    @overload
-    def dump_ver(ver_str: str) -> Tuple[int, int, int, int]: ...
     @staticmethod
-    def dump_ver(ver_str: str):
-        def _str_ver(ver_str: str) -> Tuple[int, int, int]:
-            return tuple(map(int, ver_str.split(".")))
+    def dump_ver(ver_str: str) -> typing.Union[typing.Tuple[int, int, int], typing.Tuple[int, int, int, int]]:
+        def _str_ver(ver_str: str) -> typing.Tuple[int,...]:
+            return tuple(map(int, ver_str.split(".")))  # typing: ignore
 
         ver_list = ver_str.split("_")
         ver = _str_ver(ver_list[0])
         if len(ver_list) > 1:
             if ver_list[1].startswith("b"):
                 build = int(ver_list[1][1:])
-                return ver + (build,)
-        return ver
+                return ver + (build,)   # type: ignore
+        return ver  # type: ignore
 
     def __str__(self) -> str:
         rt = f"v{self.ver[0]}.{self.ver[1]}.{self.ver[2]}"
@@ -125,10 +119,10 @@ class Version:
         return self.__str__()
 
     # region
-    def __eq__(self, other: "Version") -> bool:
+    def __eq__(self, other: "Version") -> bool: # type: ignore
         return self.ver == other.ver and self.build == other.build
 
-    def __ne__(self, other: "Version") -> bool:
+    def __ne__(self, other: "Version") -> bool: # type: ignore
         return not self.__eq__(other)
 
     def __lt__(self, other: "Version") -> bool:
@@ -199,4 +193,4 @@ class Meta:
             if s[0] in for_map:
                 lt[for_map[s[0]][0]] = for_map[s[0]][1](s[1:])
 
-        return cls(*lt)
+        return cls(*lt) # type: ignore
