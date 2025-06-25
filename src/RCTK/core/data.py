@@ -2,12 +2,15 @@
 Common base class for all data
 """
 
-import os,json
+import os
+import json
 
-from typing import Any, Union, List, overload
+from typing import Any, Dict, Union, List, overload, Type
 
-from .enums import MISSING
-from .io.file import mkdir
+from .enums import MISSING, MISSING_TYPE
+from ..tk_io.file import mkdir
+
+
 def load(path: str) -> dict:
     """
     Load data from a file.
@@ -30,6 +33,7 @@ def sync(data: dict, path: str):
         mkdir(path)
     with open(path, "w", encoding="utf-8") as file:
         json.dump(data, file)
+
 
 class _Field:
     """
@@ -67,16 +71,13 @@ class _Field:
             raise ValueError("default or default_type must be provided")
         if default is not MISSING and default_type is not MISSING:
             if self.check_type(default, default_type):
-                self.default = default
-                self.type = default_type
+                self.default, self.type = default, default_type
             else:
                 raise ValueError("default value does not match the type")
         else:
-            if default is not MISSING:
-                self.type = type(default)
-            else:
-                self.type = default_type
-            self.default = default
+            self.default, self.type = default, (
+                type(default) if default is not MISSING else default_type
+            )
         self.data = default
 
     # region check_type
@@ -85,13 +86,17 @@ class _Field:
     @overload
     def check_type(self, value: Any) -> bool: ...
     @overload
-    def check_type(self, value: Any, type_: "type") -> bool: ...
-    def check_type(self, value: Any = MISSING, type_: "type" = MISSING) -> bool: # type: ignore
-        if value is MISSING:
+    def check_type(self, value: Any, type_: Type) -> bool: ...
+    def check_type(
+        self,
+        value: Union[Any, MISSING_TYPE] = MISSING,
+        type_: Union[Type, MISSING_TYPE] = MISSING,
+    ) -> bool:
+        if value == MISSING:
             return isinstance(self.data, self.type)
-        if type_ is MISSING:
+        if type_ == MISSING:
             return isinstance(value, self.type)
-        return isinstance(value, type_)
+        return isinstance(value, type_)  # type: ignore
 
     # endregion
 
@@ -135,8 +140,7 @@ class _Field:
             raise ValueError("data does not match the type")
 
     def __set_name__(self, owner, name):
-        func = getattr(type(self.default), "__set_name__", None)
-        if func:
+        if func := getattr(type(self.default), "__set_name__", None):
             func(self.default, owner, name)
 
 
@@ -154,8 +158,9 @@ def Field(default: Any = MISSING, default_type: Any = MISSING) -> Any:
     return _Field(default, default_type)
 
 
-
 class BaseData:
+    _fields: Dict[str, _Field] = {}
+
     """
         Attributes:
             path (Union[str, None], optional): path to the data file. Defaults to None.
@@ -184,7 +189,7 @@ class BaseData:
                 _field.set_name(_name)
                 fields[_name] = _field
         obj = super().__new__(cls)
-        obj._fields = fields # type: ignore
+        obj._fields = fields
         return obj
 
     def __init__(
@@ -220,7 +225,7 @@ class BaseData:
         self._p.pop(-1, None)
         for p in sorted(self._p.keys()):
             self._p[p]()
-        for field in self._fields.values(): # type: ignore
+        for field in self._fields.values():
             setattr(self, field.name, field.data)
 
     def _load_fields(self, source: dict) -> None:
@@ -233,7 +238,7 @@ class BaseData:
         Returns:
             None
         """
-        for field in self._fields.values(): # type: ignore
+        for field in self._fields.values():
             try:
                 if field.name in source:
                     field.set_data(source[field.name])
@@ -275,4 +280,4 @@ class BaseData:
         Returns:
             List[str]: A list of attribute names.
         """
-        return list(self._fields.keys())     # type: ignore
+        return list(self._fields.keys())

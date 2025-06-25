@@ -1,13 +1,11 @@
-
-import typing
-from typing import Optional
 from logging import config, Logger, getLogger
+from typing import Union, Optional, Mapping, Dict, Any
 
-from .io import file
+from ..tk_io import file
 from .env import is_debug
 
 
-def get_log(logger_name: typing.Optional[str] = None) -> Logger:
+def get_log(logger_name: Optional[str] = None) -> Logger:
     """
     Get the logging object
 
@@ -22,9 +20,13 @@ def get_log(logger_name: typing.Optional[str] = None) -> Logger:
         logger_name = "Main"
     return getLogger(logger_name)
 
+
 # region trans
 
-def dump_format(format_name: str = "default", **kw: typing.Mapping[str, typing.Optional[str]]) -> typing.Dict[str, typing.Dict[str, str]]:
+
+def dump_format(
+    format_name: str = "default", **kw: Mapping[str, Optional[str]]
+) -> Dict[str, Dict[str, str]]:
     """
     dump formatters
 
@@ -40,18 +42,20 @@ def dump_format(format_name: str = "default", **kw: typing.Mapping[str, typing.O
     """
 
     back_format = {}
-    if format_name == "default":
-        back_format["format"] = "<%(asctime)s>[%(levelname)s]%(name)s:%(message)s"
-        back_format["datefmt"] = "%Y-%m-%d %H:%M:%S"
-    else:
-        back_format["format"] = kw["format"]
-        back_format["datefmt"] = kw["datefmt"]
+    back_format["format"], back_format["datefmt"] = (
+        ("<%(asctime)s>[%(levelname)s]%(name)s:%(message)s", "%Y-%m-%d %H:%M:%S")
+        if format_name == "default"
+        else (kw["format"], kw["datefmt"])
+    )
     return back_format
 
 
 def dump_handler(
-    handler_class: str, formatter: str = "default", level: Optional[str] = None, **kw
-) -> "dict[str, str]":
+    handler_class: str,
+    formatter: str = "default",
+    level: Optional[str] = None,
+    **kw: Mapping[str, Optional[str]],
+) -> Dict[str, str]:
     """
     dump handlers
 
@@ -73,8 +77,10 @@ def dump_handler(
 
     # region trans handlers
     if handler_class == "Console":
-        handler_class = "logging.StreamHandler"
-        back_handler["stream"] = "ext://sys.stdout"
+        handler_class, back_handler["stream"] = (
+            "logging.StreamHandler",
+            "ext://sys.stdout",
+        )
     if handler_class == "File":
         handler_class = "logging.handlers.RotatingFileHandler"
     # endregion
@@ -87,11 +93,11 @@ def dump_handler(
     back_handler["formatter"] = formatter
     if level is not None:
         back_handler["level"] = level
-    if back_handler["class"] == "logging.handlers.RotatingFileHandler":
+    if (file_name := back_handler["class"]) == "logging.handlers.RotatingFileHandler":
         if kw["filename"] is not None:
             back_handler["filename"] = kw["filename"]
             # if file mkdir
-            file.mkdir(back_handler["filename"])
+            file.mkdir(file_name)
 
         back_handler["maxBytes"] = kw["maxBytes"]
         back_handler["backupCount"] = kw["backupCount"]
@@ -102,7 +108,12 @@ def dump_handler(
     return back_handler
 
 
-def trans_config(handlers: list, formats: Optional[list] = None, exist_loggers: bool = True, **kw) -> typing.Dict[str, typing.Any]:
+def trans_config(
+    handlers: list,
+    formats: Optional[list] = None,
+    exist_loggers: bool = True,
+    **kw: Mapping[str, Optional[str]],
+) -> Dict[str, Any]:
     """
     trans config
 
@@ -138,43 +149,46 @@ def trans_config(handlers: list, formats: Optional[list] = None, exist_loggers: 
     config["loggers"][""]["level"] = kw.get("root_level", "INFO")
 
     # exist loggers
-    if exist_loggers is True:
-        config["disable_existing_loggers"] = "False"
-    else:
-        config["disable_existing_loggers"] = "True"
+    config["disable_existing_loggers"] = "False" if exist_loggers is True else "True"
 
     # default formats
     if formats is None:
-        formats = [
-            "default",
-        ]
+        formats = ["default"]
 
     # formatters
     for format_name in formats:
+        format_kw = {}
+        if (format_ := kw.get(f"{format_name}_format")) is not None and (
+            (datefmt := kw.get(f"{format_name}_datefmt"))
+        ) is not None:
+            format_kw = {
+                "format": format_,
+                "datefmt": datefmt,
+            }
         config["formatters"][format_name] = dump_format(
-            format_name=format_name,
-            format=kw.get(f"{format_name}_format","default"),
-            datefmt=kw.get(f"{format_name}_datefmt") # type: ignore
+            format_name=format_name, **format_kw
         )
 
     # handlers
     for handler_name in handlers:
         config["handlers"][handler_name] = dump_handler(
-            handler_class=kw.get(f"{handler_name}_class","Console"),
-            formatter=kw.get(f"{handler_name}_formatter", "default"),
-            level=kw.get(f"{handler_name}_level", "INFO"),
-            filename=kw.get(f"{handler_name}_filename", "log.log"),
-            maxBytes=kw.get(f"{handler_name}_maxBytes", 1048576),
-            backupCount=kw.get(f"{handler_name}_backupCount", 3),
-            encoding=kw.get(f"{handler_name}_encoding", "utf8"),
+            handler_class=kw.get(f"{handler_name}_class"),  # type: ignore
+            formatter=kw.get(f"{handler_name}_formatter", "default"),  # type: ignore
+            level=kw.get(f"{handler_name}_level", "INFO"),  # type: ignore
+            filename=kw.get(f"{handler_name}_filename", "log.log"),  # type: ignore
+            maxBytes=kw.get(f"{handler_name}_maxBytes", 1048576),  # type: ignore
+            backupCount=kw.get(f"{handler_name}_backupCount", 3),  # type: ignore
+            encoding=kw.get(f"{handler_name}_encoding", "utf8"),  # type: ignore
         )
         config["loggers"][""]["handlers"].append(handler_name)
 
     return config
 
+
 # endregion
 
-def set_log(config_dict,*, builtin:bool = False) -> None:
+
+def set_log(config_dict, *, builtin: bool = False) -> None:
     """
     日志配置根文件
 
@@ -185,9 +199,15 @@ def set_log(config_dict,*, builtin:bool = False) -> None:
         config.dictConfig(trans_config(**config_dict))
         if builtin == True:
             from .tk_api import tk_1
+
             tk_1.tk_100000("get_log", get_log)
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger = get_log("RCTK.Log")
-        logger.error("Failed to set logging config: {error}\nData: {data}".format(
-            error=e,data=(str(config_dict) )))
-        if is_debug():raise
+        logger.error(
+            "Failed to set logging config: {error}\nData: {data}".format(
+                error=e,
+                data=str(config_dict),
+            )
+        )
+        if is_debug():
+            raise

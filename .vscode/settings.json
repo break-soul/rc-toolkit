@@ -6,6 +6,7 @@
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
         "arcname",
+        "buildin",
         "cctx",
         "cfile",
         "dctx",
@@ -13,6 +14,7 @@
         "doraise",
         "flist",
         "fromlist",
+        "MGNB",
         "RCCP",
         "RCTK",
         "tinfo"

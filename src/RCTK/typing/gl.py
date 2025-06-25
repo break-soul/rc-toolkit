@@ -1,22 +1,9 @@
 
-import typing
+from typing import TYPE_CHECKING
 
-from ..core.enums import _MISSING_TYPE as MISSING_TYPE
-
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from logging import Logger
-    
 
-    
-def get_log(logger_name: typing.Optional[str] = None) -> "Logger":
-    """
-    Get the logging object
+def get_log() -> "Logger": ...
 
-    Args:
-        logger_name (str): If no name is specified, return the root logger.
-
-    Returns:
-        Logger: logging object
-    """
-    ...
-
+def lazy_import() -> object: ...

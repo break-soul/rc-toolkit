@@ -1,45 +1,64 @@
-
-import os
 import json
-import typing
+from pathlib import Path
+from os import path as os_path
 from collections import UserDict
+from typing import Union, Optional, Any
 
-from ..io import compress
-from ..enums import MISSING
+from ...tk_io import compress
+from ..enums import MISSING, MISSING_TYPE
 
-if typing.TYPE_CHECKING:
-    from ...typing import *
+
+def _load_json(file: str) -> dict:
+    return json.load(compress.decompress_with_zstd(f_zst=file, arcname="main")) # type: ignore
+
+
+def _write_json(file: str, data: dict) -> None:
+    compress.compress_with_zstd(
+        f_obj=json.dumps(data).encode("utf-8"), f_name=file, arcname="main"
+    )
+
 
 class MM(UserDict):
-    def __init__(self, file: typing.Optional[str] = None, **kw) -> None:
+    def __init__(self, file: Optional[str] = None, **kw) -> None:
         self.file = file
         super().__init__(self, **kw)
-        if self.file != None:
-            if os.path.isfile(self.file):self.load()
-            else: self.write()
+        if self.file is not None:
+            if os_path.isfile(self.file):
+                self.load()
+            else:
+                self.write()
 
-    def _load(self) -> dict:
-        return json.load(compress.decompress_zstd(self.file)) # type: ignore
-
-    def load(self) -> typing.Union[dict, int]:
-        if self.file == None: return -1
-        self.data = self._load()
+    def load(self) -> Union[dict, int]:
+        if self.file == None:
+            return -1
+        self.data = _load_json(self.file)
         return self.data
 
-    def write(self) -> typing.Optional[int]:
-        if self.file == None: return -1
-        compress.compress_zstd(json.dumps(self.data).encode("utf-8"), self.file)
+    def write(self) -> Optional[int]:
+        if self.file == None:
+            return -1
+        _write_json(self.file, self.data)
 
-    def write_back(self, key, value:typing.Union[typing.Any, MISSING_TYPE] = MISSING) -> typing.Optional[int]:
-        if self.file == None: return -1
+    def write_back(
+        self, key, value: Union[Any, MISSING_TYPE] = MISSING
+    ) -> Optional[int]:
+        if self.file == None:
+            return -1
         if value == MISSING:
             value = self.data[key]
         self.load()
         self.data[key] = value
         self.write()
 
-    def sync(self) -> typing.Optional[int]:
-        f_data = self._load()
+    def sync(self) -> Optional[int]:
+        if self.file == None:
+            return -1
+        f_data = _load_json(self.file)
         f_data.update(self.data)
         self.data = f_data
-        self.write()
+        _write_json(self.file, self.data)
+
+    def clear(self) -> dict:  # type: ignore
+        data = self.data
+        self.data = {}
+        return data
