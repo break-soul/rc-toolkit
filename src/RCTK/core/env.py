@@ -51,7 +51,7 @@ class Compile:
         file, cfile=None, dfile=None, doraise=False, optimize=1, quiet=0
     ) -> None:
         log().info("Compile {file}".format(file=file))
-        py_compile.compile(file, cfile, dfile, doraise, optimize, quiet) # type: ignore
+        py_compile.compile(file, cfile, dfile, doraise, optimize, quiet)  # type: ignore
 
     @staticmethod
     def compile_dir(

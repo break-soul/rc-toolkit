@@ -3,7 +3,7 @@ import sys
 from functools import lru_cache
 from typing import Optional
 from ..tk_io.file import get_name
-
+from typing import TYPE_CHECKING, overload
 
 @lru_cache(1)
 def log():
@@ -11,20 +11,28 @@ def log():
 
     return getLogger("RCTK.Utils.ModRuntime")
 
-
-def add_path(path: str):
-    sys.path.append(path)
+@overload
+def add_path(path: str): ...
+@overload
+def add_path(path: str, *any_path): ...
+def add_path(*args: list, **kw): # type: ignore
+    args.extend(kw.get("path", [])) # type: ignore
+    if len(args) <= 0: raise ValueError("Missing args!")
+    args_ = [str(x) for x in args]
+    sys.path.extend(args_)
 
 
 def remove_path(path: str):
     sys.path.remove(path)
 
+def _hook_buildin(key: str, value: object):
+    import builtins
+    builtins.__dict__[key] = value
+
 
 def hook_builtin(key: str, value: object):
-    from ..core.tk_api import tk_1
-
     log().warning(f"Hooking builtin {key} as {value.__str__()}")
-    tk_1.tk_100000(key, value)
+    _hook_buildin(key, value)
 
 
 def load_pyd(file_path: str, name: Optional[str] = None) -> object:

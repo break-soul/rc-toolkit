@@ -1,7 +1,8 @@
 import hashlib
 from pathlib import Path
-from os import path, makedirs
+from os import path, makedirs as os_mkdirs
 from functools import partial
+from re import X
 from typing import Tuple, Optional, overload, Union, List
 from io import BufferedWriter, BufferedReader
 
@@ -10,25 +11,28 @@ from ..core.enums import HashType, MAGIC
 
 
 # region dir
-def mkdir(f_path: Union[Path, str], is_dir: bool = False) -> None:
-    """
-    make file dirs
-
-    Args:
-        file_path (str): file path
-    """
-    if not is_dir:
-        f_path = Path(f_path).parent
-    if path.isdir(f_path):
-        return
+def _mkdir(f_path: Path) -> int:
+    if f_path.is_dir(): return 0
     try:
-        makedirs(f_path)
-    except Exception:
-        if not is_debug():
-            return
+        os_mkdirs(f_path)
+        return 0
+    except:
+        if not is_debug(): return -1
         raise
 
+def mkdir(f_path: Union[Path, str], is_dir: bool = False) -> int:
+    if isinstance(f_path, str): f_path = Path(f_path)
+    if not is_dir: f_path = f_path.parent
+    return _mkdir(f_path)
 
+def mkdirs(f_root: Union[Path, str], f_group: List[str]) -> int:
+    if isinstance(f_root, str): f_root = Path(f_root)
+    rt = 0
+    if f_group is None: return 0
+    for f_sub in f_group:
+        if (x := _mkdir(f_root / f_sub)) == 0:
+            rt = x
+    return rt
 # endregion
 
 

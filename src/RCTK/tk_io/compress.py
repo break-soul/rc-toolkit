@@ -45,7 +45,7 @@ def decompress_with_zstd(f_zst: str, *, dump: str) -> int: ...
 @overload
 def decompress_with_zstd(
     f_zst: str, *, arcname: str = "main"
-) -> Union[int, BufferedReader]: ...
+) -> Union[int, IO[bytes]]: ...
 def decompress_with_zstd(
     f_zst: str,
     *,
@@ -56,7 +56,7 @@ def decompress_with_zstd(
     buffer = BytesIO()
 
     with open(f_zst, "rb") as f_obj:
-        if verify_magic(RCCP_MAGIC, f_obj) != 0: # type: ignore
+        if verify_magic(RCCP_MAGIC, f_obj) != 0:  # type: ignore
             return -1
         dctx = ZstdDecompressor()
         with dctx.stream_reader(f_obj) as reader:

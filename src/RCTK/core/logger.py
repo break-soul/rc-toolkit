@@ -92,11 +92,11 @@ def dump_handler(
 
     back_handler["formatter"] = formatter
     if level is not None:
-        back_handler["level"] = level
+        # level_dict = {"CRITICAL":50,"ERROR":40,"WARNING":30,"INFO":20,"DEBUG":10,"NOTSET":0}
+        back_handler["level"] = level #if isinstance(level, int) else level_dict[level]
     if (file_name := back_handler["class"]) == "logging.handlers.RotatingFileHandler":
         if kw["filename"] is not None:
             back_handler["filename"] = kw["filename"]
-            # if file mkdir
             file.mkdir(file_name)
 
         back_handler["maxBytes"] = kw["maxBytes"]
@@ -186,9 +186,10 @@ def trans_config(
 
 
 # endregion
+def hook_print(*objects, sep=' ', end='\n', file=None, flush=False):
+    return get_log("Print").debug((sep.join(map(str, objects)) + end).replace("\n", " "))
 
-
-def set_log(config_dict, *, builtin: bool = False) -> None:
+def set_log(config_dict, *, builtin: bool = False, print_: bool = False) -> None:
     """
     日志配置根文件
 
@@ -197,10 +198,14 @@ def set_log(config_dict, *, builtin: bool = False) -> None:
     """
     try:
         config.dictConfig(trans_config(**config_dict))
+        
         if builtin == True:
             from .tk_api import tk_1
-
             tk_1.tk_100000("get_log", get_log)
+            
+            if print_ == True:
+                tk_1.tk_100000("print", hook_print)
+
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger = get_log("RCTK.Log")
         logger.error(

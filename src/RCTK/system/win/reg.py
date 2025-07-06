@@ -1,8 +1,8 @@
-
 import sys
 import winreg
 
-def register_protocol(name, script, icon = None):
+
+def register_protocol(name, script, icon=None):
     ...
     try:
         pathon_exe = sys.executable

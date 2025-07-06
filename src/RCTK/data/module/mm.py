@@ -5,54 +5,48 @@ from collections import UserDict
 from typing import Union, Optional, Any
 
 from ...tk_io import compress
-from ..enums import MISSING, MISSING_TYPE
+from ...core.enums import MISSING, MISSING_TYPE
 
 
-def _load_json(file: str) -> dict:
-    return json.load(compress.decompress_with_zstd(f_zst=file, arcname="main")) # type: ignore
+def _load_json(file: Path) -> dict:
+    buffer = compress.decompress_with_zstd(f_zst=str(file), arcname="main")
+    if isinstance(buffer, int):  # decompress failed
+        raise ValueError(f"Failed to decompress {file} with error code {buffer}")
+    return json.load(buffer)
 
-
-def _write_json(file: str, data: dict) -> None:
+def _write_json(file: Path, data: dict) -> None:
     compress.compress_with_zstd(
-        f_obj=json.dumps(data).encode("utf-8"), f_name=file, arcname="main"
+        f_obj=json.dumps(data).encode("utf-8"), f_name=str(file), arcname="main"
     )
 
 
 class MM(UserDict):
-    def __init__(self, file: Optional[str] = None, **kw) -> None:
-        self.file = file
+    def __init__(self, file: Union[str, Path, None] = None, **kw) -> None:
         super().__init__(self, **kw)
-        if self.file is not None:
-            if os_path.isfile(self.file):
-                self.load()
-            else:
-                self.write()
+        self.file: Union[Path, None] = file if file is None else Path(file)
+        if self.file:
+            self.load() if self.file.is_file() else self.write()
 
     def load(self) -> Union[dict, int]:
-        if self.file == None:
-            return -1
+        if not self.file: return -1
         self.data = _load_json(self.file)
         return self.data
 
     def write(self) -> Optional[int]:
-        if self.file == None:
-            return -1
+        if not self.file: return -1
         _write_json(self.file, self.data)
 
     def write_back(
         self, key, value: Union[Any, MISSING_TYPE] = MISSING
     ) -> Optional[int]:
-        if self.file == None:
-            return -1
-        if value == MISSING:
-            value = self.data[key]
+        if not self.file: return -1
+        if value == MISSING: value = self.data[key]
         self.load()
         self.data[key] = value
         self.write()
 
     def sync(self) -> Optional[int]:
-        if self.file == None:
-            return -1
+        if not self.file: return -1
         f_data = _load_json(self.file)
         f_data.update(self.data)
         self.data = f_data

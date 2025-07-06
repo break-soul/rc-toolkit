@@ -94,7 +94,7 @@ class Version:
         ver_list = list(self.ver)
         ver_list[ver_path - 1] += 1
         ver = tuple(ver_list)
-        self.ver = tuple(ver_list) # type: ignore
+        self.ver = tuple(ver_list)  # type: ignore
 
         if self.build != 0:
             self.build += 1
@@ -208,7 +208,7 @@ class Meta:
             if s[0] in for_map:
                 lt[for_map[s[0]][0]] = for_map[s[0]][1](s[1:])
 
-        return cls(*lt) # type: ignore
+        return cls(*lt)  # type: ignore
 
 
 class MAGIC(Enum):
