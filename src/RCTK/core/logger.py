@@ -1,9 +1,10 @@
 from logging import config, Logger, getLogger
-from typing import Optional, Mapping, Dict, Any
+from typing import Mapping, Any
 
 from ..io_ import file
 from .env import is_debug
 from .lazy_do import lazy_do
+
 
 @lazy_do
 def get_log(logger_name: str | None = None) -> Logger:
@@ -26,8 +27,8 @@ def get_log(logger_name: str | None = None) -> Logger:
 
 
 def dump_format(
-    format_name: str = "default", **kw: Mapping[str, Optional[str]]
-) -> Dict[str, Dict[str, str]]:
+    format_name: str = "default", **kw: Mapping[str, str | None]
+) -> dict[str, dict[str, str]]:
     """
     dump formatters
 
@@ -54,9 +55,9 @@ def dump_format(
 def dump_handler(
     handler_class: str,
     formatter: str = "default",
-    level: Optional[str] = None,
-    **kw: Mapping[str, Optional[str]],
-) -> Dict[str, str]:
+    level: str | None = None,
+    **kw: Mapping[str, str | None],
+) -> dict[str, str | None]:
     """
     dump handlers
 
@@ -94,7 +95,9 @@ def dump_handler(
     back_handler["formatter"] = formatter
     if level is not None:
         # level_dict = {"CRITICAL":50,"ERROR":40,"WARNING":30,"INFO":20,"DEBUG":10,"NOTSET":0}
-        back_handler["level"] = level #if isinstance(level, int) else level_dict[level]
+        back_handler["level"] = (
+            level  # if isinstance(level, int) else level_dict[level]
+        )
     if (file_name := back_handler["class"]) == "logging.handlers.RotatingFileHandler":
         if kw["filename"] is not None:
             back_handler["filename"] = kw["filename"]
@@ -111,10 +114,10 @@ def dump_handler(
 
 def trans_config(
     handlers: list,
-    formats: Optional[list] = None,
+    formats: list | None = None,
     exist_loggers: bool = True,
-    **kw: Mapping[str, Optional[str]],
-) -> Dict[str, Any]:
+    **kw: Mapping[str, str | None],
+) -> dict[str, Any]:
     """
     trans config
 
@@ -189,8 +192,11 @@ def trans_config(
 # endregion
 
 log_print = get_log("Print")
-def hook_print(*objects, sep=' ', end='\n', file=None, flush=False):
+
+
+def hook_print(*objects, sep=" ", end="\n", file=None, flush=False):
     return log_print.debug((sep.join(map(str, objects)) + end).replace("\n", " "))
+
 
 def set_log(config_dict, *, builtin: bool = False, print_: bool = False) -> None:
     """
@@ -201,11 +207,12 @@ def set_log(config_dict, *, builtin: bool = False, print_: bool = False) -> None
     """
     try:
         config.dictConfig(trans_config(**config_dict))
-        
+
         if builtin == True:
             from ..runtime.py_env import set_global
+
             set_global("get_log", get_log)
-            
+
             if print_ == True:
                 set_global("print", hook_print)
 
