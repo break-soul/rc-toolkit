@@ -1,8 +1,7 @@
 import hashlib
 from pathlib import Path
-from os import path, makedirs as os_mkdirs
+from os import makedirs as os_mkdirs
 from functools import partial
-from re import X
 from typing import Tuple, Optional, overload, Union, List
 from io import BufferedWriter, BufferedReader
 
@@ -12,32 +11,42 @@ from ..core.enums import HashType, MAGIC
 
 # region dir
 def _mkdir(f_path: Path) -> int:
-    if f_path.is_dir(): return 0
+    if f_path.is_dir():
+        return 0
     try:
         os_mkdirs(f_path)
         return 0
     except:
-        if not is_debug(): return -1
+        if not is_debug():
+            return -1
         raise
 
+
 def mkdir(f_path: Union[Path, str], is_dir: bool = False) -> int:
-    if isinstance(f_path, str): f_path = Path(f_path)
-    if not is_dir: f_path = f_path.parent
+    if isinstance(f_path, str):
+        f_path = Path(f_path)
+    if not is_dir:
+        f_path = f_path.parent
     return _mkdir(f_path)
 
+
 def mkdirs(f_root: Union[Path, str], f_group: List[str]) -> int:
-    if isinstance(f_root, str): f_root = Path(f_root)
+    if isinstance(f_root, str):
+        f_root = Path(f_root)
     rt = 0
-    if f_group is None: return 0
+    if f_group is None:
+        return 0
     for f_sub in f_group:
         if (x := _mkdir(f_root / f_sub)) == 0:
             rt = x
     return rt
+
+
 # endregion
 
 
 # region file
-def get_name(f_path: Union[Path, str]) -> List[str]:
+def get_name(f_path: Union[Path, str]) -> list[str]:
     f_path = Path(f_path)
     return [f_path.stem, f_path.suffix]
 
@@ -70,7 +79,7 @@ def get_hash(
     file,
     algorithm: HashType = HashType.BLAKE2,
     *,
-    digest_size: Optional[int] = None,
+    digest_size: int | None = None,
     chunk_size: int = 128 * 1048576,
 ) -> str: ...
 def get_hash(
@@ -94,7 +103,7 @@ def get_hash(
 
 def verify_hash(
     file, hash_str, algorithm: HashType = HashType.BLAKE2
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     if (act_hash := get_hash(file, algorithm)) == hash_str.lower():
         return True, act_hash
     return False, act_hash

@@ -4,7 +4,6 @@ This module contains functions to control the Python interpreter.
 
 import os
 import sys
-import py_compile
 
 from typing import Optional, TYPE_CHECKING
 
@@ -43,26 +42,6 @@ is_debug = Env.is_debug
 
 def get_pycache() -> Optional[str]:
     return sys.pycache_prefix
-
-
-class Compile:
-    @staticmethod
-    def compile_file(
-        file, cfile=None, dfile=None, doraise=False, optimize=1, quiet=0
-    ) -> None:
-        log().info("Compile {file}".format(file=file))
-        py_compile.compile(file, cfile, dfile, doraise, optimize, quiet)  # type: ignore
-
-    @staticmethod
-    def compile_dir(
-        path, cfile=None, dfile=None, doraise=False, optimize=1, quiet=0
-    ) -> None:
-        for root, _, files in os.walk(path):
-            for file in files:
-                if file.endswith(".py"):
-                    Compile.compile_file(
-                        os.path.join(root, file), cfile, dfile, doraise, optimize, quiet
-                    )
 
 
 def is_module(name, path: str) -> bool:

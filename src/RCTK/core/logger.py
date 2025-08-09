@@ -1,11 +1,12 @@
 from logging import config, Logger, getLogger
-from typing import Union, Optional, Mapping, Dict, Any
+from typing import Optional, Mapping, Dict, Any
 
-from ..tk_io import file
+from ..io_ import file
 from .env import is_debug
+from .lazy_do import lazy_do
 
-
-def get_log(logger_name: Optional[str] = None) -> Logger:
+@lazy_do
+def get_log(logger_name: str | None = None) -> Logger:
     """
     Get the logging object
 
@@ -186,8 +187,10 @@ def trans_config(
 
 
 # endregion
+
+log_print = get_log("Print")
 def hook_print(*objects, sep=' ', end='\n', file=None, flush=False):
-    return get_log("Print").debug((sep.join(map(str, objects)) + end).replace("\n", " "))
+    return log_print.debug((sep.join(map(str, objects)) + end).replace("\n", " "))
 
 def set_log(config_dict, *, builtin: bool = False, print_: bool = False) -> None:
     """
@@ -200,11 +203,11 @@ def set_log(config_dict, *, builtin: bool = False, print_: bool = False) -> None
         config.dictConfig(trans_config(**config_dict))
         
         if builtin == True:
-            from .tk_api import tk_1
-            tk_1.tk_100000("get_log", get_log)
+            from ..runtime.py_env import set_global
+            set_global("get_log", get_log)
             
             if print_ == True:
-                tk_1.tk_100000("print", hook_print)
+                set_global("print", hook_print)
 
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger = get_log("RCTK.Log")

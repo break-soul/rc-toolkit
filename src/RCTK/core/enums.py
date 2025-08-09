@@ -5,7 +5,7 @@ Store the enums used in the package.
 from enum import Enum
 from typing import Tuple
 
-from ..system.base import System, Arch
+from ..sys_.base import System, Arch
 
 
 def mode_func(*args, **kw): ...
@@ -161,54 +161,6 @@ class Version:
         )
 
     # endregion
-
-
-class Meta:
-    def __init__(
-        self,
-        name: str,
-        ver: Version = Version(0, 0, 0),
-        release: Release = Release.RELEASE,
-        platform: System = System.get_os(),
-        arch: Arch = Arch.get_arch(),
-    ):
-        self.name: str = name
-        self.ver: Version = ver
-        self.release: Release = release
-        self.platform: System = platform
-        self.arch: Arch = arch
-
-    def __str__(self) -> str:
-        rt = f"{self.name}"
-        if self.ver != Version(0, 0, 0):
-            rt += f"-{str(self.ver)}"
-        if self.release and self.release != MISSING:
-            rt += f"-r{self.release.value}"
-        if self.platform != System.Other and self.platform != MISSING:
-            rt += f"-p{self.platform.value}"
-        if self.arch != Arch.Other and self.arch != MISSING:
-            rt += f"-a_{self.arch.value}"
-        return rt
-
-    def __repr__(self):
-        return self.__str__()
-
-    @classmethod
-    def dump(cls, mate_str) -> str:
-        split = mate_str.split("-")
-        lt = list([split[0], MISSING, MISSING, MISSING, MISSING])
-        for_map = {
-            "v": [1, Version.from_str],
-            "r": [2, Release.from_str],
-            "p": [3, System.get_os],
-            "a": [4, Arch.get_arch],
-        }
-
-        for s in split[1:]:
-            if s[0] in for_map:
-                lt[for_map[s[0]][0]] = for_map[s[0]][1](s[1:])
-
-        return cls(*lt)  # type: ignore
 
 
 class MAGIC(Enum):

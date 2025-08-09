@@ -5,10 +5,10 @@ Common base class for all data
 import os
 import json
 
-from typing import Any, Dict, Union, List, overload, Type
+from typing import Any, overload, Type
 
 from .enums import MISSING, MISSING_TYPE
-from ..tk_io.file import mkdir
+from ..io_.file import mkdir
 
 
 def load(path: str) -> dict:
@@ -89,8 +89,8 @@ class _Field:
     def check_type(self, value: Any, type_: Type) -> bool: ...
     def check_type(
         self,
-        value: Union[Any, MISSING_TYPE] = MISSING,
-        type_: Union[Type, MISSING_TYPE] = MISSING,
+        value: Any | MISSING_TYPE = MISSING,
+        type_: Type | MISSING_TYPE = MISSING,
     ) -> bool:
         if value == MISSING:
             return isinstance(self.data, self.type)
@@ -159,11 +159,11 @@ def Field(default: Any = MISSING, default_type: Any = MISSING) -> Any:
 
 
 class BaseData:
-    _fields: Dict[str, _Field] = {}
+    _fields: dict[str, _Field] = {}
 
     """
         Attributes:
-            path (Union[str, None], optional): path to the data file. Defaults to None.
+            path (str | None, optional): path to the data file. Defaults to None.
 
         priority of data, higher priority will overwrite lower priority, -1 to disable
             init_p (int, optional): priority of init data. Defaults to 4.
@@ -178,7 +178,7 @@ class BaseData:
         _load_init(self): Load the initial data.
         _load_file(self): Load the data from a file.
         _load_default(self): Placeholder method.
-        __dir__(self) -> List[str]: Return a list of attribute names.
+        __dir__(self) -> list[str]: Return a list of attribute names.
     ...
     """
 
@@ -195,7 +195,7 @@ class BaseData:
     def __init__(
         self,
         /,
-        path: Union[str, None] = None,
+        path: str | None = None,
         init_p: int = 4,
         file_p: int = 2,
         default_p: int = 1,
@@ -273,11 +273,11 @@ class BaseData:
         """Useless, used only as a placeholder"""
         ...
 
-    def __dir__(self) -> List[str]:
+    def __dir__(self) -> list[str]:
         """
         Return a list of attribute names for the fields.
 
         Returns:
-            List[str]: A list of attribute names.
+            list[str]: A list of attribute names.
         """
         return list(self._fields.keys())
