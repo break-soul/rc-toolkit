@@ -1,9 +1,9 @@
 from logging import config, Logger, getLogger
 from typing import Mapping, Any
 
-from ..io_ import file
 from .env import is_debug
 from .lazy_do import lazy_do
+from ..io_ import file
 
 
 @lazy_do

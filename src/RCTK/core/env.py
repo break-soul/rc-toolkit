@@ -5,16 +5,11 @@ This module contains functions to control the Python interpreter.
 import os
 import sys
 
-from typing import Optional, TYPE_CHECKING
+from .logger import get_log
 
-if TYPE_CHECKING:
-    from logging import Logger
+from typing import TYPE_CHECKING
 
-
-def log() -> "Logger":
-    from .logger import get_log
-
-    return get_log("RCTK.Core.Env")
+log = get_log("RCTK.Core.Env")
 
 
 class Env:
@@ -27,7 +22,7 @@ class Env:
         os.environ[key] = value
 
     @staticmethod
-    def get_env(key: str, default: Optional[str] = None) -> Optional[str]:
+    def get_env(key: str, default: str | None = None) -> str | None:
         return (
             os.environ.get(key, default) if default is not None else os.environ.get(key)
         )
@@ -40,7 +35,7 @@ class Env:
 is_debug = Env.is_debug
 
 
-def get_pycache() -> Optional[str]:
+def get_pycache() -> str | None:
     return sys.pycache_prefix
 
 

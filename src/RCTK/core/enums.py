@@ -3,9 +3,6 @@ Store the enums used in the package.
 """
 
 from enum import Enum
-from typing import Tuple
-
-from ..sys_.base import System, Arch
 
 
 def mode_func(*args, **kw): ...
@@ -69,7 +66,7 @@ class Release(Enum):
 
 class Version:
     def __init__(self, ver_1: int, ver_2: int, ver_3: int, build: int = 0):
-        self.ver: Tuple[int, int, int] = (ver_1, ver_2, ver_3)
+        self.ver: tuple[int, int, int] = (ver_1, ver_2, ver_3)
         self.build: int = build
 
     @classmethod
@@ -82,10 +79,10 @@ class Version:
     def get_build(self) -> int:
         return self.build
 
-    def set_ver(self, ver: Tuple[int, int, int]) -> None:
+    def set_ver(self, ver: tuple[int, int, int]) -> None:
         self.ver = ver
 
-    def get_ver(self) -> Tuple[int, int, int]:
+    def get_ver(self) -> tuple[int, int, int]:
         return self.ver
 
     def update(self, ver_path: int = 3) -> None:
@@ -100,8 +97,8 @@ class Version:
             self.build += 1
 
     @staticmethod
-    def dump_ver(ver_str: str) -> Tuple[int, ...]:
-        def _str_ver(ver_str: str) -> Tuple[int, ...]:
+    def dump_ver(ver_str: str) -> tuple[int, ...]:
+        def _str_ver(ver_str: str) -> tuple[int, ...]:
             return tuple(map(int, ver_str.split(".")))
 
         ver_list = ver_str.split("_")
