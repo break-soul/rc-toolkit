@@ -1,8 +1,8 @@
 import hashlib
 from pathlib import Path
-from os import makedirs as os_mkdirs
+from os import makedirs as os_makedirs
 from functools import partial
-from typing import Tuple, Optional, overload, Union, List
+from typing import overload
 from io import BufferedWriter, BufferedReader
 
 from ..core.env import is_debug
@@ -14,7 +14,7 @@ def _mkdir(f_path: Path) -> int:
     if f_path.is_dir():
         return 0
     try:
-        os_mkdirs(f_path)
+        os_makedirs(f_path)
         return 0
     except:
         if not is_debug():
@@ -22,7 +22,7 @@ def _mkdir(f_path: Path) -> int:
         raise
 
 
-def mkdir(f_path: Union[Path, str], is_dir: bool = False) -> int:
+def mkdir(f_path: Path | str, is_dir: bool = False) -> int:
     if isinstance(f_path, str):
         f_path = Path(f_path)
     if not is_dir:
@@ -30,7 +30,7 @@ def mkdir(f_path: Union[Path, str], is_dir: bool = False) -> int:
     return _mkdir(f_path)
 
 
-def mkdirs(f_root: Union[Path, str], f_group: List[str]) -> int:
+def makedirs(f_root: Path | str, f_group: list[str]) -> int:
     if isinstance(f_root, str):
         f_root = Path(f_root)
     rt = 0
@@ -46,7 +46,7 @@ def mkdirs(f_root: Union[Path, str], f_group: List[str]) -> int:
 
 
 # region file
-def get_name(f_path: Union[Path, str]) -> list[str]:
+def get_name(f_path: Path | str) -> list[str]:
     f_path = Path(f_path)
     return [f_path.stem, f_path.suffix]
 
@@ -86,7 +86,7 @@ def get_hash(
     file,
     algorithm: HashType = HashType.BLAKE2,
     *,
-    digest_size: Optional[int] = None,
+    digest_size: int | None = None,
     chunk_size: int = 128 * 1048576,
 ) -> str:
 

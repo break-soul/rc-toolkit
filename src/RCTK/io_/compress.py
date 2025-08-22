@@ -7,6 +7,8 @@ from zstandard.backend_c import ZstdCompressor, ZstdDecompressor
 from ..core.enums import RCCP_MAGIC
 from .file import write_magic, verify_magic
 
+from ..typing.su import PathLike
+
 
 def _follow(path: Path, deep: int) -> list[Path]:
     rt = []
@@ -22,7 +24,7 @@ def _follow(path: Path, deep: int) -> list[Path]:
 
 
 def mark_arc(
-    f_obj: list[Path | str] | dict[str, Path | str], follow: bool = False
+    f_obj: list[PathLike] | dict[str, PathLike], follow: bool = False
 ) -> tuple[list, dict[str, Path]]:
     """
     {arc, path}
@@ -52,7 +54,7 @@ def compress_with_zstd(
 ) -> int: ...
 @overload
 def compress_with_zstd(
-    f_obj: dict[str | Path, str], f_name: Path | str, *, follow: bool = False
+    f_obj: dict[PathLike, str], f_name: Path | str, *, follow: bool = False
 ) -> int: ...
 @overload
 def compress_with_zstd(

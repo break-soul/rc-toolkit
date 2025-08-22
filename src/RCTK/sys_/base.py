@@ -53,4 +53,5 @@ class Arch(Enum):
             case _:
                 return cls.Other
 
+
 env_os = System.get_os()

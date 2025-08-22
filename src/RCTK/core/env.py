@@ -5,17 +5,13 @@ This module contains functions to control the Python interpreter.
 import os
 import sys
 
-from .logger import get_log
-
-from typing import TYPE_CHECKING
-
-log = get_log("RCTK.Core.Env")
+from ..typing.su import PathLike
 
 
 class Env:
     @staticmethod
-    def add_path(path: str) -> None:
-        Env.set_env("path", Env.get_env("path") + ";" + path)  # type: ignore
+    def add_path(path: PathLike) -> None:
+        Env.set_env("path", Env.get_env("path") + ";" + str(path))  # type: ignore
 
     @staticmethod
     def set_env(key: str, value: str) -> None:
