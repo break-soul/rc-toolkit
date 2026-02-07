@@ -3,8 +3,8 @@ from pathlib import Path
 from collections import UserDict
 from typing import Any
 
-from ...io_ import compress
-from ...core.enums import MISSING, MISSING_TYPE
+from ..io_ import compress
+from ..core.enums import MISSING, MISSING_TYPE
 
 
 def _load_json(file: Path) -> dict:
