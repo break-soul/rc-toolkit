@@ -3,11 +3,11 @@ name = "rc-toolkit"
 version = "0.2.5"
 description = ""
 authors = [
-    {name = "break-soul", email = "57186766+break-soul@users.noreply.github.com"},
+    { name = "break-soul", email = "57186766+break-soul@users.noreply.github.com" },
 ]
-license = {text = "MIT"}
-dependencies = ["zstandard>=0.23.0"]
-requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = ["backports.zstd ; python_version<'3.14'"]
+requires-python = ">=3.9"
 readme = "README.md"
 
 [build-system]

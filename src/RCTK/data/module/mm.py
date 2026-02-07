@@ -1,7 +1,3 @@
-from ...runtime.lazy_import import enable_lazy_import
-
-enable_lazy_import(globals())
-
 import json
 from pathlib import Path
 from collections import UserDict

@@ -1,15 +1,10 @@
 import warnings
+from pathlib import Path
 from functools import wraps
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TypeAlias
 
 
-if TYPE_CHECKING:
-    from pathlib import Path
-    from ctypes import _CArgObject, _Pointer, c_int
-
-PathLike: TypeAlias = "Path | str"
-
-CPointInt: TypeAlias = "_Pointer[c_int] | _CArgObject"
+PathLike: TypeAlias = Path | str
 
 
 def deprecated(func, args):
