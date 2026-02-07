@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Sequence
+from typing import Any
 from collections import deque
+from collections.abc import Callable, Sequence
 
 
 @dataclass
-class Call:
+class Cell:
     data: Any
     loader: list[str]
     level: int
@@ -16,6 +17,6 @@ class Pool:
     ) -> None:
         self.downer = downer
         self.upper = upper
-        self.stack: Sequence[Call] = deque(maxlen=max_size)
+        self.stack: Sequence[Cell] = deque(maxlen=max_size)
 
-    def new_call(self) -> Call: ...
+    def new_call(self) -> Cell: ...

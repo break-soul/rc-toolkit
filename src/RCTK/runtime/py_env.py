@@ -3,18 +3,10 @@ import sys
 from pathlib import Path
 from ..io_.file import get_name
 
-
-from ..core.logger import get_log
-
-
-log = get_log("RCTK.Runtime.PyENV")
-
-
 def set_global(key: str, value: object):
     import builtins
 
     builtins.__dict__[key] = value
-    log.info(f"Set global {key} as {value.__str__()}")
 
 
 def add_path(*args: str | Path):
@@ -28,7 +20,7 @@ def remove_path(path: str | Path):
     sys.path.remove(str(path))
 
 
-def load_pyd(f_path: str | Path, name: str | None = None) -> object:
+def load_py(f_path: str | Path, name: str | None = None) -> object:
     import importlib.util as imp_u
 
     if name is None:

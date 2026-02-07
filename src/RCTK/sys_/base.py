@@ -15,19 +15,13 @@ class System(Enum):
     @classmethod
     @lru_cache(3)
     def get_os(cls, os_str: str = platform.system()) -> "System":
-        match os_str:
-            case "Windows":
-                return cls.Win32
-            case "Linux":
-                return cls.Linux
-            case "Darwin":
-                return cls.macOS
-            case "Aix":
-                return cls.AIX
-            case os_str if os_str.startswith("Freebsd"):
-                return cls.FreeBSD
-            case _:
-                return cls.Other
+        return {
+            "Windows": cls.Win32,
+            "Linux": cls.Linux,
+            "Darwin": cls.macOS,
+            "Aix": cls.AIX,
+            "Freebsd": cls.FreeBSD,
+        }.get(os_str, cls.Other)
 
 
 class Arch(Enum):
@@ -41,16 +35,12 @@ class Arch(Enum):
     @lru_cache(1)
     def get_arch(cls, arch_str: str = platform.machine()) -> "Arch":
         arch_str = arch_str.lower().replace("_", "")
-        match arch_str:
-            case "amd64":
-                return cls.x64
-            case "i386":
-                return cls.x86
-            case "arm":
-                return cls.ARM
-            case "arm64":
-                return cls.ARM64
-            case _:
-                return cls.Other
+        return {
+            "amd64": cls.x64,
+            "i386": cls.x86,
+            "arm": cls.ARM,
+            "arm64": cls.ARM64,
+        }.get(arch_str, cls.Other)
+
 
 env_os = System.get_os()
