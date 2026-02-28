@@ -40,7 +40,7 @@ def compress_with_zstd(
         f_obj = {f_path.name: f_path for f_path in map(Path, f_obj)}
     if isinstance(f_obj, dict):
         for arc_path, arc_obj in f_obj.items():
-            if isinstance(arc_obj, bytes):
+            if isinstance(arc_obj, (bytes, bytearray, memoryview)):
                 dt[arc_path] = arc_obj
                 continue
             if not isinstance(arc_obj, Path):
