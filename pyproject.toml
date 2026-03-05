@@ -1,6 +1,6 @@
 [project]
 name = "rc-toolkit"
-version = "0.2.6"
+version = "0.3.0"
 description = ""
 authors = [
     { name = "break-soul", email = "57186766+break-soul@users.noreply.github.com" },
@@ -9,6 +9,21 @@ license = { text = "MIT" }
 dependencies = ["backports.zstd ; python_version<'3.14'"]
 requires-python = ">=3.9"
 readme = "README.md"
+classifiers = [
+    "Natural Language :: English",
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Free Threading :: 4 - Resilient",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 
 [build-system]
 requires = ["pdm-pep517>=1.0.0"]
